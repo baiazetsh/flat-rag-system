@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# venv
+venv/
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# Docker
+*.log
+*.pid
+*.sock
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cache
+.cache/
+
+# Project specific
+analyze_project.py
+logs/
+*.log
+
+# Qdrant 
+storage/

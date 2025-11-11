@@ -1,0 +1,58 @@
+#rag_local/docker-compose.yml
+version: '3.9'
+
+services:
+  backend:
+    build: ./backend
+    container_name: rag_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    depends_on:
+      - qdrant
+      - ollama
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+    restart: unless-stopped
+    cpus: 2.0
+    mem_limit: 2g
+
+  qdrant:
+    image: qdrant/qdrant:v1.10.0
+    environment:
+      QDRANT__STORAGE__OPTIMIZE_MEM_USAGE: "true"
+      QDRANT__STORAGE__CACHE_CAPACITY_MB: "128"
+    mem_limit: 1g
+    cpus: 1.0
+    container_name: rag_qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: rag_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+      - ./scripts/init-ollama.sh:/init-ollama.sh:ro
+    env_file:
+      - .env
+    entrypoint: ["/bin/sh", "/init-ollama.sh"]
+    restart: always
+    cpus: 3.0
+    mem_limit: 6g
+
+volumes:
+  qdrant_data:
+  ollama_data:
+
+
+

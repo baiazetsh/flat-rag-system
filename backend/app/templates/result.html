@@ -1,0 +1,119 @@
+<!-- templates/result.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🧠 RAG Result</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans min-h-screen flex flex-col">
+  
+  <header class="bg-white shadow-sm p-4 mb-6">
+    <h1 class="text-2xl font-bold text-center text-indigo-700">
+      🧠 Migration RAG Assistant - Result
+    </h1>
+    <p class="text-center text-gray-500 text-sm">
+      <a href="/" class="text-indigo-600 hover:underline">← Back to search</a>
+    </p>
+  </header>
+
+  <main class="flex-grow flex justify-center px-4">
+    <div class="w-full max-w-3xl bg-white shadow-md rounded-xl p-6">
+      
+      <!-- Query Display -->
+      <div class="mb-4 p-3 bg-blue-50 rounded-lg">
+        <h3 class="font-semibold text-sm text-gray-600 mb-1">Your Question:</h3>
+        <p class="text-gray-800">{{ query }}</p>
+      </div>
+
+      <!-- Answer Section -->
+      <div class="border-t pt-4 mb-4">
+        <h2 class="font-semibold text-lg mb-3 text-indigo-700">📝 Answer:</h2>
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <p class="text-gray-800 whitespace-pre-wrap">{{ result.get('answer', 'No answer available.') }}</p>
+        </div>
+      </div>
+
+      <!-- Metadata Section -->
+      <div class="grid grid-cols-2 gap-4 mt-4 p-4 bg-gray-50 rounded-lg">
+        <div>
+          <p class="text-sm text-gray-600">🤖 <strong>LLM Model:</strong></p>
+          <p class="text-sm">{{ model }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">🔢 <strong>Embedding Model:</strong></p>
+          <p class="text-sm">{{ vector_db }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">📚 <strong>Collection:</strong></p>
+          <p class="text-sm">{{ collection }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">📄 <strong>Context Chunks:</strong></p>
+          <p class="text-sm">{{ result.get('context_used', 0) }}</p>
+        </div>
+      </div>
+
+      <!-- Timing Information -->
+      {% if timing %}
+      <div class="mt-4 p-4 bg-green-50 rounded-lg">
+        <h3 class="font-semibold text-base mb-2 text-green-700">⏱️ Performance:</h3>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <div>Embedding: <span class="font-mono">{{ timing.get('embedding', 0) }} ms</span></div>
+          <div>Search: <span class="font-mono">{{ timing.get('search', 0) }} ms</span></div>
+          <div>LLM Generation: <span class="font-mono">{{ timing.get('llm', 0) }} s</span></div>
+          <div>Total: <span class="font-mono font-bold">{{ timing.get('total', 0) }} s</span></div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Results Section (Retrieved Documents) -->
+      {% if results %}
+      <details class="mt-4 p-4 bg-yellow-50 rounded-lg">
+        <summary class="cursor-pointer text-yellow-800 font-semibold hover:underline">
+          📄 Retrieved Documents ({{ results|length }})
+        </summary>
+        <div class="mt-3 space-y-3">
+          {% for item in results %}
+          <div class="p-3 bg-white border border-yellow-200 rounded">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-sm font-semibold text-gray-700">Rank #{{ item.rank }}</span>
+              <span class="text-sm bg-yellow-100 px-2 py-1 rounded">
+                Score: {{ item.score }}
+              </span>
+            </div>
+            <p class="text-xs text-gray-600 mb-1">Source: {{ item.source }}</p>
+            <p class="text-sm text-gray-700">{{ item.text_preview[:200] }}...</p>
+          </div>
+          {% endfor %}
+        </div>
+      </details>
+      {% endif %}
+
+      <!-- Debug Info -->
+      <details class="mt-4">
+        <summary class="cursor-pointer text-gray-600 text-sm hover:underline">
+          🔧 Debug: Raw JSON Response
+        </summary>
+        <pre class="mt-2 bg-gray-100 p-3 text-xs rounded-lg whitespace-pre-wrap overflow-x-auto">{{ raw_data }}</pre>
+      </details>
+
+      <!-- Action Buttons -->
+      <div class="mt-6 flex gap-3 justify-center">
+        <a href="/" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg shadow transition">
+          🔍 New Search
+        </a>
+        <a href="/plot" target="_blank" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-6 rounded-lg shadow transition">
+          📊 View Vectors
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="text-center text-gray-500 text-xs py-4 mt-6">
+    © 2025 RAG Assistant | Powered by FastAPI + Qdrant + Ollama
+  </footer>
+
+</body>
+</html>

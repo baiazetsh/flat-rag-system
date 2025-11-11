@@ -26,12 +26,13 @@ app.include_router(rag_ui.router)
 
 #===============UTILS============================
 def distance(p1, p2):
+    """Simple Euclidean distance"""
     return sqrt(sum((a - b) ** 2 for a, b in zip(p1, p2)))
 
 
 @app.get("/ping_qdrant")
 def ping_qdrant():
-    """Checking alive Qdrant and return collections"""
+    """Check Qdrant availability and list collections"""
     try:  
         info = qdrant.get_collections()
         collections = [c.name for c in info.collections]
@@ -47,26 +48,37 @@ def ping_qdrant():
 @app.on_event("startup")
 async def startup_event():
     """Ensure Qdrant collection exists on startup"""
-    app.state.client = AsyncClient(base_url="http://127.0.0.1:8000", timeout=60.0)
 
-    collections = [c.name for c in qdrant.get_collections().collections]
-    collection_name = cfg.qdrant.collection
-    
-    if collection_name not in collections:
-        log.info(f"Creating Qdrant collection '{collection_name}'")
-        qdrant.create_collection(
-            collection_name=collection_name,
-            vectors_config=qmodels.VectorParams(
-                size=768,
-                distance=qmodels.Distance.COSINE
-            ),
-        )       
-    else:
-        log.info(f"🚀🚀🚀🚀Collection '{collection_name}' already exists")
+    try:
+        if os.getenv("CI") == "true":
+            logging.warning("🧪 CI mode detected — skipping Qdrant connection.")
+            return
         
+        # Prepare HTTP client
+        app.state.client = AsyncClient(base_url="http://127.0.0.1:8000", timeout=60.0)
+
+        collections = [c.name for c in qdrant.get_collections().collections]
+        collection_name = cfg.qdrant.collection
         
+        if collection_name not in collections:
+            log.info(f"Creating Qdrant collection '{collection_name}'")
+            qdrant.create_collection(
+                collection_name=collection_name,
+                vectors_config=qmodels.VectorParams(
+                    size=768,
+                    distance=qmodels.Distance.COSINE
+                ),
+            )       
+        else:
+            log.info(f"🚀🚀🚀🚀Collection '{collection_name}' already exists")
+            
+    except Exception as e:
+        logging.warning(f"⚠ Skipping Qdrant init: {e}")
+            
+
 @app.on_event("shutdown")        
 async def shutdown_event():
+    
     """Gracefully close HTTP client"""
     if hasattr(app.state, "client"):
         await app.state.client.aclose()

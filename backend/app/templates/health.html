@@ -1,0 +1,303 @@
+<!--health.html-->
+{% extends "base.html" %}
+
+{% block title %}System Health - RAG Local{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .health-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .status-banner {
+        padding: 2rem;
+        border-radius: 10px;
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    
+    .status-banner.loading {
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+        color: white;
+    }
+    
+    .status-banner.ok {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+    
+    .status-banner.degraded {
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+        color: white;
+    }
+    
+    .status-banner.error {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+    
+    .service-grid {
+        display: grid;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .service-card {
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 1.5rem;
+        transition: all 0.3s;
+    }
+    
+    .service-card:hover {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .service-card.ok {
+        border-left: 4px solid #28a745;
+    }
+    
+    .service-card.error {
+        border-left: 4px solid #dc3545;
+    }
+    
+    .service-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .service-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: bold;
+    }
+    
+    .status-badge.ok {
+        background: #28a745;
+        color: white;
+    }
+    
+    .status-badge.error {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .service-details {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.5rem 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .service-details dt {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .service-details dd {
+        margin: 0;
+        color: #667eea;
+        word-break: break-all;
+    }
+    
+    .error-message {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        margin-top: 1rem;
+        border-radius: 5px;
+        color: #856404;
+    }
+    
+    .refresh-btn {
+        padding: 1rem 2rem;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0 auto;
+    }
+    
+    .refresh-btn:hover {
+        background: #5568d3;
+        transform: translateY(-2px);
+    }
+    
+    .refresh-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+    }
+    
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,0.3);
+        border-top: 3px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .metadata {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 5px;
+        margin-top: 2rem;
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="health-container">
+    <h1>💚 System Health Check</h1>
+
+    <div id="status-banner" class="status-banner loading">
+        <span class="loading-spinner"></span> Checking system health...
+    </div>
+
+    <div id="services" class="service-grid"></div>
+
+    <button id="refresh-btn" class="refresh-btn" onclick="checkHealth()">
+        🔄 Refresh Status
+    </button>
+
+    <div class="metadata">
+        <div id="last-check">Last checked: Never</div>
+        <div style="margin-top: 0.5rem;">Auto-refresh: <strong>3000 seconds</strong></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let autoRefreshInterval = null;
+
+    async function checkHealth() {
+        const banner = document.getElementById('status-banner');
+        const services = document.getElementById('services');
+        const refreshBtn = document.getElementById('refresh-btn');
+        const lastCheck = document.getElementById('last-check');
+
+        banner.className = 'status-banner loading';
+        banner.innerHTML = '<span class="loading-spinner"></span> Checking system health...';
+        refreshBtn.disabled = true;
+
+        try {
+            const response = await fetch('/api/health/', { cache: "no-store" });
+            const data = await response.json();
+
+            const overallStatus = data.overall_status || 'error';
+            banner.className = `status-banner ${overallStatus}`;
+
+            if (overallStatus === 'ok') {
+                banner.innerHTML = '✅ All Systems Operational';
+            } else if (overallStatus === 'degraded') {
+                banner.innerHTML = `⚠️ System Degraded: ${data.degraded_services.join(', ')}`;
+            } else {
+                banner.innerHTML = '❌ System Error';
+            }
+
+            services.innerHTML = '';
+
+            if (data.vector_backend) {
+                services.appendChild(createServiceCard('🗄️ Vector Database', data.vector_backend));
+            }
+
+            if (data.embedding_provider) {
+                services.appendChild(createServiceCard('🔢 Embedding Provider', data.embedding_provider));
+            }
+
+            if (data.llm_provider) {
+                services.appendChild(createServiceCard('🤖 LLM Provider', data.llm_provider));
+            }
+
+            lastCheck.innerHTML = `Last checked: ${new Date(data.timestamp).toLocaleString()}`;
+
+        } catch (error) {
+            banner.className = 'status-banner error';
+            banner.innerHTML = '❌ Health Check Failed';
+
+            services.innerHTML = `
+                <div class="error-message">
+                    <strong>Error:</strong> ${error.message}
+                </div>`;
+        } finally {
+            refreshBtn.disabled = false;
+        }
+    }
+
+    function createServiceCard(title, data) {
+        const card = document.createElement('div');
+        card.className = `service-card ${data.status}`;
+
+        const statusBadge = data.status === 'ok'
+            ? '<span class="status-badge ok">✓ OK</span>'
+            : '<span class="status-badge error">✗ ERROR</span>';
+
+        let details = '<dl class="service-details">';
+        if (data.backend) details += `<dt>Backend:</dt><dd>${data.backend}</dd>`;
+        if (data.provider) details += `<dt>Provider:</dt><dd>${data.provider}</dd>`;
+        if (data.model) details += `<dt>Model:</dt><dd>${data.model}</dd>`;
+        if (data.url) details += `<dt>URL:</dt><dd>${data.url}</dd>`;
+        if (data.dimension) details += `<dt>Dimension:</dt><dd>${data.dimension}</dd>`;
+        if (data.collections) details += `<dt>Collections:</dt><dd>${data.collections.join(', ')}</dd>`;
+        details += '</dl>';
+
+        let errorMessage = '';
+        if (data.status === 'error' && data.detail) {
+            errorMessage = `<div class="error-message"><strong>Error:</strong> ${data.detail}</div>`;
+        }
+
+        card.innerHTML = `
+            <div class="service-header">
+                <div class="service-title">${title}</div>
+                ${statusBadge}
+            </div>
+            ${details}
+            ${errorMessage}
+        `;
+
+        return card;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        checkHealth();
+        autoRefreshInterval = setInterval(checkHealth, 3000000);
+    });
+
+    window.addEventListener('beforeunload', () => {
+        if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+    });
+</script>
+{% endblock %}

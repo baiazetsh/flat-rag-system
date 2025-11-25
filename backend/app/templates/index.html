@@ -1,66 +1,57 @@
-<!--templates/index.html-->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>🧠 Migration RAG Assistant</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
+{% extends "base.html" %}
 
-<body class="bg-gray-50 text-gray-900 font-sans min-h-screen flex flex-col">
-  <header class="bg-white shadow-sm p-4 mb-6">
-    <h1 class="text-2xl font-bold text-center text-indigo-700">
-      🧠 Migration RAG Assistant
-    </h1>
-    <p class="text-center text-gray-500 text-sm">Ask questions, choose collection, get answers from your vector DB.</p>
-  </header>
+{% block title %}RAG Query - RAG Local{% endblock %}
 
-  <main class="flex-grow flex justify-center px-4">
-    <div class="w-full max-w-2xl bg-white shadow-md rounded-xl p-6">
-      <form action="/ask" method="post" class="space-y-4">
-        
-        <!-- Query input -->
-        <div>
-          <label for="query" class="block text-sm font-semibold mb-1">💬 Your question:</label>
-          <textarea id="query" name="query" rows="4" required
-            class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-indigo-200 focus:border-indigo-400 resize-none"></textarea>
-        </div>
+{% block content %}
+<h1>🤖 Ask a Question (RAG)</h1>
 
-        <!-- Collection selector -->
-        <div>
-          <label for="collection" class="block text-sm font-semibold mb-1">📚 Collection:</label>
-          <select id="collection" name="collection"
-            class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-indigo-200 focus:border-indigo-400">
-            {% for c in collections %}
-              <option value="{{ c }}">{{ c }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <!-- Mode selector -->
-        <div>
-          <label for="mode" class="block text-sm font-semibold mb-1">⚙️ Mode:</label>
-          <select id="mode" name="mode"
-            class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-indigo-200 focus:border-indigo-400">
-            <option value="local">Local (Ollama)</option>
-            <option value="api">Remote (API)</option>
-          </select>
-        </div>
-
-        <!-- Submit button -->
-        <div class="text-center">
-          <button type="submit"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg shadow transition">
-            🚀 Ask
-          </button>
-        </div>
-      </form>
+<form method="post" action="/ui/ask" style="margin-top: 2rem;">
+    <div style="margin-bottom: 1rem;">
+        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Your Question:</label>
+        <textarea 
+            name="query" 
+            rows="4" 
+            required
+            placeholder="What is Alice doing in the garden?"
+            style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;"
+        ></textarea>
     </div>
-  </main>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+        <div>
+            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Collection:</label>
+            <select name="collection" style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px;">
+                {% for coll in collections %}
+                <option value="{{ coll }}">{{ coll }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div>
+            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Mode:</label>
+            <select name="mode" style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px;">
+                <option value="local">Local (Ollama)</option>
+            </select>
+        </div>
+    </div>
+    
+    <button 
+        type="submit"
+        style="width: 100%; padding: 1rem; background: #667eea; color: white; border: none; border-radius: 5px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.3s;"
+        onmouseover="this.style.background='#5568d3'"
+        onmouseout="this.style.background='#667eea'"
+    >
+        🚀 Get Answer
+    </button>
+</form>
 
-  <footer class="text-center text-gray-500 text-xs py-4">
-    © 2025 RAG Assistant | Powered by FastAPI + Qdrant + Ollama
-  </footer>
-</body>
-</html>
+<div style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
+    <h3 style="color: #667eea; margin-bottom: 0.5rem;">💡 How it works:</h3>
+    <ol style="margin-left: 1.5rem; line-height: 1.8;">
+        <li>Your question is converted to a vector embedding</li>
+        <li>We search for similar chunks in the vector database</li>
+        <li>Relevant context is sent to the LLM</li>
+        <li>LLM generates an answer based on retrieved documents</li>
+    </ol>
+</div>
+{% endblock %}

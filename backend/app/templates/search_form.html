@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🔍 Semantic Search Tester</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col">
+  <header class="bg-white shadow p-4 text-center mb-6">
+    <h1 class="text-2xl font-bold text-indigo-700">🔍 Semantic Search Tester</h1>
+    <p class="text-sm text-gray-500">Test vector DB retrieval before LLM generation.</p>
+  </header>
+
+  <main class="flex-grow flex justify-center">
+    <form action="/ui/search" method="post" class="bg-white shadow-md p-6 rounded-xl w-full max-w-2xl space-y-4">
+      <div>
+        <label class="block text-sm font-semibold mb-1">💬 Query:</label>
+        <textarea name="query" rows="4" required
+          class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-indigo-200"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold mb-1">📚 Collection:</label>
+        <select name="collection" class="w-full border border-gray-300 rounded-lg p-2">
+          {% for c in collections %}
+            <option value="{{ c }}">{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold mb-1">🔢 Top K:</label>
+        <input type="number" name="top_k" value="5" min="1" max="50"
+          class="w-full border border-gray-300 rounded-lg p-2">
+      </div>
+
+      <div class="text-center">
+        <button type="submit"
+          class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg shadow transition">
+          🚀 Search
+        </button>
+      </div>
+    </form>
+  </main>
+
+  <footer class="text-center text-gray-500 text-xs py-4">
+    © 2025 RAG Local API | Semantic Search UI
+  </footer>
+</body>
+</html>

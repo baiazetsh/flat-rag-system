@@ -1,0 +1,366 @@
+<!-- app/templates/upload_result.html -->
+{% extends "base.html" %}
+
+{% block title %}Upload Success - RAG Local{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .success-banner {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        text-align: center;
+        margin: 2rem 0;
+        box-shadow: 0 4px 20px rgba(40, 167, 69, 0.3);
+    }
+    
+    .success-banner h1 {
+        color: white;
+        border: none;
+        margin: 0 0 0.5rem 0;
+        font-size: 2.5rem;
+    }
+    
+    .success-banner p {
+        font-size: 1.2rem;
+        margin: 0;
+        opacity: 0.95;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .stat-card {
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-color: #667eea;
+    }
+    
+    .stat-card .icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-card .value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #667eea;
+        display: block;
+        margin: 0.5rem 0;
+    }
+    
+    .stat-card .label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .details-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .details-section h3 {
+        color: #667eea;
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem;
+        background: white;
+        border-radius: 5px;
+        border-left: 3px solid #667eea;
+    }
+    
+    .detail-item .key {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .detail-item .value {
+        color: #667eea;
+        font-weight: 500;
+    }
+    
+    .actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin: 2rem 0;
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s;
+    }
+    
+    .btn-primary {
+        background: #667eea;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #5568d3;
+        transform: translateY(-2px);
+    }
+    
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+    
+    .btn-success:hover {
+        background: #218838;
+        transform: translateY(-2px);
+    }
+    
+    .btn-info {
+        background: #17a2b8;
+        color: white;
+    }
+    
+    .btn-info:hover {
+        background: #138496;
+        transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+    
+    .progress-info {
+        background: #e7f3ff;
+        border-left: 4px solid #667eea;
+        padding: 1.5rem;
+        border-radius: 5px;
+        margin: 2rem 0;
+    }
+    
+    .progress-info h3 {
+        color: #667eea;
+        margin: 0 0 1rem 0;
+    }
+    
+    .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1rem;
+    }
+    
+    .progress-step {
+        flex: 1;
+        text-align: center;
+        padding: 1rem;
+        position: relative;
+    }
+    
+    .progress-step::after {
+        content: '→';
+        position: absolute;
+        right: -1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #28a745;
+        font-size: 1.5rem;
+    }
+    
+    .progress-step:last-child::after {
+        display: none;
+    }
+    
+    .progress-step .step-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .progress-step .step-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-banner">
+    <h1>✅ Upload Successful!</h1>
+    <p>Your document has been processed and added to the vector database</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="icon">📄</div>
+        <div class="value">{{ total_chunks }}</div>
+        <div class="label">Chunks Created</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="icon">📊</div>
+        <div class="value">{{ stats.avg_chunk_chars }}</div>
+        <div class="label">Avg Chunk Size</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="icon">🔢</div>
+        <div class="value">{{ stats.avg_chunk_tokens }}</div>
+        <div class="label">Avg Tokens</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="icon">📚</div>
+        <div class="value">{{ collection }}</div>
+        <div class="label">Collection</div>
+    </div>
+</div>
+
+<div class="progress-info">
+    <h3>🔄 Processing Pipeline</h3>
+    <div class="progress-steps">
+        <div class="progress-step">
+            <span class="step-icon">📤</span>
+            <span class="step-label">File Upload</span>
+        </div>
+        <div class="progress-step">
+            <span class="step-icon">✂️</span>
+            <span class="step-label">Text Chunking</span>
+        </div>
+        <div class="progress-step">
+            <span class="step-icon">🧮</span>
+            <span class="step-label">Embeddings</span>
+        </div>
+        <div class="progress-step">
+            <span class="step-icon">💾</span>
+            <span class="step-label">Vector Storage</span>
+        </div>
+    </div>
+</div>
+
+<div class="details-section">
+    <h3>📋 Upload Details</h3>
+    <div class="details-grid">
+        <div class="detail-item">
+            <span class="key">📁 Filename:</span>
+            <span class="value">{{ filename }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="key">🗄️ Collection:</span>
+            <span class="value">{{ collection }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="key">📏 Chunk Size:</span>
+            <span class="value">{{ chunk_size }} chars</span>
+        </div>
+        <div class="detail-item">
+            <span class="key">🔁 Overlap:</span>
+            <span class="value">{{ overlap }} sentences</span>
+        </div>
+        <div class="detail-item">
+            <span class="key">📊 Max Chunks:</span>
+            <span class="value">{{ max_chunks }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="key">📐 Total Chunks:</span>
+            <span class="value">{{ total_chunks }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="details-section">
+    <h3>📈 Chunk Statistics</h3>
+    <div class="details-grid">
+        <div class="detail-item">
+            <span class="key">📝 Total Characters:</span>
+            <span class="value">{{ "{:,}".format(stats.total_chars) }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="key">🔤 Total Tokens:</span>
+            <span class="value">{{ "{:,}".format(stats.total_tokens) }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="key">📏 Min Chunk:</span>
+            <span class="value">{{ stats.min_chunk_size }} chars</span>
+        </div>
+        <div class="detail-item">
+            <span class="key">📏 Max Chunk:</span>
+            <span class="value">{{ stats.max_chunk_size }} chars</span>
+        </div>
+        <div class="detail-item">
+            <span class="key">📊 Median Size:</span>
+            <span class="value">{{ stats.median_chunk_size }} chars</span>
+        </div>
+        <div class="detail-item">
+            <span class="key">🔢 Median Tokens:</span>
+            <span class="value">{{ stats.median_token_count }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="actions">
+    <a href="/ui/" class="btn btn-primary">
+        🤖 Ask Questions (RAG)
+    </a>
+    <a href="/ui/search/?collection={{ collection }}" class="btn btn-success">
+        🔍 Search Vectors
+    </a>
+    <a href="/api/plot/?collection={{ collection }}&limit=100" class="btn btn-info">
+        📊 Visualize Vectors
+    </a>
+    <a href="/upload/upload_docs/form" class="btn btn-secondary">
+        📤 Upload Another
+    </a>
+</div>
+
+<div style="background: #d4edda; border-left: 4px solid #28a745; padding: 1.5rem; border-radius: 5px; margin: 2rem 0;">
+    <h3 style="color: #28a745; margin: 0 0 1rem 0;">✨ Next Steps</h3>
+    <ul style="margin-left: 1.5rem; line-height: 1.8;">
+        <li>Try asking questions about your document using the RAG interface</li>
+        <li>Use semantic search to find specific information</li>
+        <li>Visualize how your vectors are distributed in the embedding space</li>
+        <li>Upload more documents to build a comprehensive knowledge base</li>
+    </ul>
+</div>
+{% endblock %}

@@ -24,6 +24,7 @@ jobs:
         working-directory: ./backend
         run: |
           pip install -r requirements.txt
+          pip install -r backend/requirements-tests.txt
           pip install pytest
 
       - name: Run API test suite

@@ -1,31 +1,49 @@
-name: Backend Tests
+name: Tests
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main, master ]
 
 jobs:
-  test:
+  tests:
     runs-on: ubuntu-latest
+
+    env:
+      PYTHONUNBUFFERED: "1"
+      CI: "true"
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
 
       - name: Install dependencies
+        working-directory: ./backend
         run: |
-          cd backend
+          pip install --upgrade pip
           pip install -r requirements.txt
-          pip install -r requirements-test.txt
+          if [ -f requirements-test.txt ]; then
+            pip install -r requirements-test.txt
+          fi
+          pip install pytest pytest-cov
 
-      - name: Run tests
+      
+     
+      - name: Run tests with coverage
+        working-directory: ./backend
         run: |
-          cd backend
-          pytest -v --tb=short --maxfail=1 --disable-warnings
+          pytest -v --cov=app --cov-report=xml --cov-report=term-missing
+
+      - name: Upload coverage.xml
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: backend/coverage.xml

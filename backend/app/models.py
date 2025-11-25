@@ -1,7 +1,7 @@
-#app/models.py
+#app/models.py legacy
 from pydantic import BaseModel, Field
 from typing import Optional
-from app.clients import cfg
+from app.core.config import cfg
 
 # ============================================================
 #  Pydantic Models (app/models.py)
@@ -32,13 +32,11 @@ class EmbedRequest(BaseModel):
 
 class SearchRequest(BaseModel):
     query: str
-    #top_k: int = Field(default_factory=lambda: cfg.searchsettings.top_k)
-    top_k: int = 3
+    top_k: int = Field(default_factory=lambda: cfg.top_k)
+    collection: Optional[str] = None
   
 
 class RAGRequest(BaseModel):
     query: str
-    #top_k: int = Field(default_factory=lambda: cfg.searchsettings.top_k)    
-    #collection: str = Field(default_factory=lambda: cfg.qdrant.collection)
     top_k: Optional[int] = None
     collection: Optional[str] = None

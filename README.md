@@ -1,148 +1,256 @@
-# 🧠 Migration RAG Assistant
+# **Flat RAG System v2.0 (Improved Stable Release)**
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/baiazetsh/flat-rag-system/tests.yml?branch=main&label=Build&color=brightgreen)](https://github.com/baiazetsh/flat-rag-system/actions)
-[![Test Coverage](https://img.shields.io/badge/Coverage-90%25-blue.svg)](test_reports/coverage_all/index.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
 
+A modern, modular Retrieval-Augmented Generation (RAG) engine built with **FastAPI**, **Qdrant**, and **Ollama**.
 
-A lightweight yet powerful **Retrieval-Augmented Generation (RAG)** system built with **FastAPI**, **Ollama**, and **Qdrant** — including a simple web interface for asking questions and viewing results.
+This release includes:
+- A reworked, clean architecture  
+- Dependency injection & service layer  
+- Robust chunking pipeline  
+- Stable clients for LLM / embeddings / vector DB  
+- Full debug Web UI  
+- PCA vector visualization  
 
 ---
 
-## 🚀 Overview
+## 🚀 Key Improvements in v2.0
 
-This project connects a local language model with a vector database to build a working RAG pipeline.  
-You can upload your text files, index them into Qdrant, and then ask natural-language questions.  
-The system finds the most relevant chunks, builds a context, and lets the LLM generate the final answer.
+### 🧱 Architecture (Clean, Modular)
+- Layered structure  
+- DI via FastAPI `app.state`  
+- Strong error handling  
+- Extensible client factory  
+- Cleaner separation of concerns  
+
+### 🧩 SmartTextSplitter
+- Semantic chunking (if supported)
+- Token-aware fallback  
+- Window overlap  
+- Adaptive chunk sizing (from `.env`)  
+
+### 🧠 RAG Pipeline
+- Better context builder  
+- Stable prompt generator  
+- Reduced hallucinations  
+- Predictable answers  
+
+### 🔍 Retrieval Layer
+- Unified vector client  
+- More robust Qdrant integration  
+- Safe collection handling  
+- Configurable thresholds  
+
+### 💬 Clients (LLM / Embeddings / Vector)
+Supports formats:
+- Ollama (`{"response": "..."}`)
+- `generated_text`
+- `text`
+- OpenAI-style (`choices[].message.content`)  
+
+Handles:
+- API errors  
+- timeouts  
+- invalid JSON  
+- connection failures  
+
+### 📊 PCA Visualization
+- `/api/plot`
+- PCA → PNG export  
+- Visual debugging of embedding space  
+
+### 💻 Full Web UI
+- RAG UI  
+- Search UI  
+- Embedding UI  
+- PCA Viewer  
+- Health Dashboard  
 
 ---
 
 ## ✨ Features
-
-- 🔍 **Semantic Search** powered by Qdrant  
-- 💬 **Context-aware answers** using local LLMs (via Ollama)  
-- 🧩 **Full RAG pipeline** — embeddings, retrieval, generation  
-- 🧱 **FastAPI backend + Jinja2 templates (HTML UI)**  
-- 📦 **Dockerized setup** — easy to run anywhere  
-- 🧾 **File uploader** with automatic text chunking and vectorization  
-- 🧪 **Built-in tests** (Pytest + Coverage + GitHub Actions ready)
+- Full local RAG pipeline  
+- Modular structure  
+- Smart chunking  
+- Semantic retrieval  
+- Local LLM  
+- PCA visualization  
+- Docker-ready  
+- Strong logging  
 
 ---
 
 ## ⚙️ Tech Stack
 
-| Layer | Tool |
-|-------|------|
+| Layer | Technology |
+|-------|------------|
 | Backend | FastAPI |
 | Vector DB | Qdrant |
-| LLM Engine | Ollama |
-| Data Models | Pydantic |
-| Async HTTP | httpx |
-| Frontend | Jinja2 Templates |
-| Containerization | Docker Compose |
-| Testing | Pytest, pytest-cov |
+| LLM Runtime | Ollama |
+| Embeddings | mxbai-embed-large / Ollama |
+| Config | Pydantic Settings |
+| HTTP | httpx |
+| UI | Jinja2 |
+| Visualization | PCA (sklearn) + matplotlib |
+| Containers | Docker + Compose |
 
 ---
 
 ## 📁 Project Structure
 
-flat-rag-system/
-├── backend/ # FastAPI app, routes, models, services
-│ ├── app/
-│ ├── tests/ # Unit & integration tests
-│ ├── Dockerfile
-│ └── requirements-test.txt
-├── scripts/ # Utility scripts (init, run_tests, etc.)
-├── screenshots/ # UI and result images
-├── .github/ # Workflows (CI/CD)
-├── compose.yml # Multi-container setup
-├── .env.example # Environment template
-├── README.md # You are here
-├── LICENSE # MIT License
-└── analyze_project.py # Analyzer script
+backend/
+├── app/
+│ ├── clients/
+│ ├── services/
+│ ├── dependencies/
+│ ├── routes/
+│ ├── templates/
+│ ├── core/
+│ └── main.py
+├── Dockerfile
+├── compose.yml
+└── .env.example
+
 
 ---
 
-## 🧰 Quick Start
+## 🧰 Getting Started
 
-### 1. Clone the repository
+### 1) Clone
 ```bash
 git clone https://github.com/baiazetsh/flat-rag-system.git
 cd flat-rag-system
 
-
-### 2. Configure environment
+2) Configure
 cp .env.example .env
 
-Update values in .env (especially Ollama and Qdrant settings if needed).
-
-3. Run via Docker Compose
+3) Run
 docker compose up --build
-Backend will be available at:
-👉 http://localhost:8000/
 
-4. Open the web UI
+🖥️ Web Interface
+Page	URL
+RAG UI	/ui
+Semantic Search	/ui/search
+Embedding Form	/api/embed/form
+Health UI	/api/health/ui
+PCA Viewer	/api/plot
+📡 API Endpoints
+Health
 
-Upload .txt files, then ask questions via the form — the system retrieves and generates answers instantly.
+GET /api/health
 
+RAG
 
-🧪 Run Tests
-docker exec -it rag_backend ./run_tests.sh
-cd backend
-pytest -v --cov=app
-Coverage report will be available at:
-backend/test_reports/coverage_all/index.html
+POST /api/search_with_llm
 
+Search
 
-## 🖼️ Screenshots
+POST /api/search
 
-### Main Interface
-![Home UI](screenshots/ui_home.png)
+Embedding
 
-### Example Answer
-![Result UI](screenshots/ui_result.png)
+POST /api/embed
 
-![Tests](https://github.com/baiazetsh/flat-rag-system/actions/workflows/tests.yml/badge.svg)
+LLM Direct
 
+POST /api/llm/ask
 
-🚧 Roadmap
-✅ Done
+Upload
 
- FastAPI backend with endpoints (/ask, /search, /embed)
+POST /api/upload
 
- Qdrant integration for semantic search
+PCA
 
- Ollama embeddings + generation
+GET /api/plot
 
- Unit & API tests (pytest)
+🧭 Architecture Diagrams
+ASCII Diagram
+                 ┌─────────────────────────────┐
+                 │         Web Browser          │
+                 │   (RAG UI / Search UI /      │
+                 │    Embed UI / PCA Viewer)    │
+                 └───────────────┬─────────────┘
+                                 │
+                                 ▼
+                     ┌──────────────────────┐
+                     │      FastAPI App      │
+                     │     (main.py)         │
+                     └─────────┬─────────────┘
+                               │
+        ┌──────────────────────┼──────────────────────────┐
+        │                      │                          │
+        ▼                      ▼                          ▼
+┌──────────────────┐   ┌──────────────────┐     ┌─────────────────────┐
+│     Routes        │   │  Dependencies    │     │   Templates (UI)    │
+│  /api/* /ui/*     │   │  DI Factories    │     │   Jinja2 HTML       │
+└─────────┬────────┘   └─────────┬────────┘     └───────────┬─────────┘
+          │                      │                            │
+          ▼                      ▼                            ▼
+┌──────────────────┐   ┌──────────────────┐     ┌─────────────────────────┐
+│    Services       │   │  SmartTextSplitter│     │    PCA Visualization    │
+│ (RAG / Vector /   │   │  Context Builder │     │  (sklearn + matplotlib) │
+│  LLM / Embeddings)│   │  Prompter        │     └─────────────────────────┘
+└─────────┬────────┘   └─────────┬────────┘
+          │                      │
+          ▼                      ▼
+ ┌──────────────────┐   ┌─────────────────────────┐
+ │   Clients         │   │        Config + Logger  │
+ │ - LLM Client      │   │   (Pydantic Settings)   │
+ │ - Embedding Client│   │                         │
+ │ - Vector Client   │   └─────────────────────────┘
+ └───────┬──────────┘
+         │
+         ▼
+  ┌───────────────────────────────────────────────────┐
+  │                   External Services                │
+  │   ┌───────────────┐   ┌─────────────────┐         │
+  │   │    Ollama      │   │     Qdrant      │         │
+  │   │ (LLM + Embeds) │   │ (Vector Search) │         │
+  │   └───────────────┘   └─────────────────┘         │
+  └───────────────────────────────────────────────────┘
 
- Docker Compose environment
+Mermaid Architecture
+flowchart TD
 
-🧠 In Progress
+A[Web Browser<br>(UI: RAG / Search / Embed / PCA)] --> B(FastAPI App<br>main.py)
 
- Web UI (Jinja2 templates + upload form)
+B --> C[Routes<br>/api/*  /ui/*]
+B --> D[Dependencies<br>DI Factories]
+B --> E[Templates<br>Jinja2 UI]
 
- Dynamic Qdrant collection creation
+C --> F[Services<br>RAG / Search / Embeddings / LLM / Vector]
+D --> F
 
- Improved context builder with adaptive chunking
+F --> G[SmartTextSplitter<br>Context Builder<br>Prompter]
+F --> H[PCA Visualization<br>sklearn + matplotlib]
 
- Logging + timing metrics (embedding, search, LLM)
+F --> I[Clients<br>LLM / Embedding / Vector]
 
-🔮 Planned
+I --> J[Ollama<br>(LLM + Embeddings)]
+I --> K[Qdrant<br>(Vector DB)]
 
- Deploy demo to Render / HuggingFace Spaces
+B --> L[Config + Logger<br>Pydantic Settings]
 
- Multiple LLMs (Gemma, Qwen, Mistral)
+RAG Flow (Mermaid)
+flowchart TD
 
- Real-time streamed responses via WebSocket
+A[User Query] --> B[SmartTextSplitter<br>(optional preprocessing)]
+B --> C[Embedding Client<br>Ollama Embeddings]
+C --> D[Vector DB Search<br>Qdrant]
+D --> E[Top-K Retrieved Chunks]
+E --> F[Context Builder<br>Merge / Rank / Filter]
+F --> G[Prompter<br>Construct Final Prompt]
+G --> H[LLM Client<br>Ollama Generate]
+H --> I[Final Answer]
+I --> J[Return to UI / API]
 
- Admin dashboard for document management
+📄 License
 
- Prometheus + Grafana metrics dashboard
+MIT License.
 
+👤 Author
 
-Author: @baiazetsh
-
-Project: Flat RAG System — lightweight local AI retrieval assistant
-v 1.0.0
+@baiazetsh
+Flat RAG System — Local AI Retrieval Engine (2025)
+v2.0.0

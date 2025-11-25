@@ -13,6 +13,7 @@ from app.services.embeddings_service import get_embedding
 from app.services.llm_service import generate_answer
 from app.services import vector_services as vs
 from app.services.generate_rag_answer import generate_rag_answer
+from app.core.config import cfg
 
 
 # ============================================================
@@ -265,4 +266,4 @@ class TestGenerateRAGAnswer:
         )
         
         assert "answer" in result
-        assert result["collection"] == "docs"  # from cfg
+        assert result["collection"] == cfg.default_collection_name  # from cfg

@@ -73,7 +73,7 @@ class TestEmbedRequest:
         """Test with very long text."""
         long_text = "word " * 10000
         request = EmbedRequest(text=long_text)
-        assert len(request.text) > 50000
+        assert len(request.text) >= 50000
 
 
 # ============================================================

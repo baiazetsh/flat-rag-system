@@ -19,3 +19,6 @@ numpy==1.26.4
 pydantic
 scikit-learn
 pydantic-settings
+pytest
+pytest-asyncio
+

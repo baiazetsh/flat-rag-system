@@ -48,17 +48,3 @@ class GenericEmbeddingClient(IEmbeddingClient):
                     return emb
 
             raise RuntimeError(f"Invalid embedding response: {data}")
-
-
-            """
-            # Expected structure: {"embedding": [...]}
-            embedding = data.get("embedding")
-
-            if embedding is None:
-                raise RuntimeError(f"Embedding missing in response: {data}")
-            
-            if not isinstance(embedding, list):
-                raise RuntimeError(f"Embedding has invalid type: {type(embedding)}")
-            
-            return embedding
-             """

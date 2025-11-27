@@ -131,5 +131,6 @@ async def rag_ask(
             "raw_data": safe_data,
             "timing": timing,
             "results": results,
+            
         }
     )

@@ -30,7 +30,11 @@ def build_rag_prompt_advanced(
     """Enhanced RAG prompt with chain-of-thought reasoning and source tracking."""
     metadata_str = ""
     if metadata:
-        metadata_str = f"\nDocument metadata: {metadata}\n"
+        metadata_str = "\n".join([
+            f"[Source: {m.get('source', 'N/A')}, Chunk: {m.get('chunk_index', '?')}]"
+            for m in metadata
+    ])
+    prompt = f"""... CONTEXT:\n{context}\n\nSOURCES:\n{metadata_str}\n\nQUESTION: ..."""
     
     return f"""You are an expert scientific assistant with strong analytical capabilities.
 

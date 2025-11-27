@@ -36,6 +36,7 @@ async def search_in_vector_db(
         vector=vector,
         top_k=top_k,
         score_threshold=score_threshold,
+        
     )
     
     return results
@@ -133,7 +134,8 @@ async def upsert_vectors(
     # Packing universal points
     points = [
         {
-            "id": p.get("chunk_index") or i,
+            #"id": p.get("chunk_index") or i,
+            "id": p["id"],
             "vector": vectors[i],
             "payload": p,
         }

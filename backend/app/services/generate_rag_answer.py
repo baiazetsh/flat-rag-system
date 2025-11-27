@@ -9,7 +9,7 @@ import time
 from app.core.logger import log
 from app.core.config import cfg
 
-from app.services.prompt_builder import build_rag_prompt
+from app.services.prompt_builder import build_rag_prompt_advanced
 #from app.services.llm_service import generate_answer
 from app.clients.base_client import IEmbeddingClient, ILLMClient, IVectorClient
 from app.services.vector_services import normalize_threshold
@@ -60,9 +60,25 @@ async def generate_rag_answer(
             "context_used": 0,
             "collection": collection,
         }
+    
+    context_chunks = []
+    metadata_list = []
+    for r in results:
+        text = r.get("text", "")
+        if text:
+            context_chunks.append(text)
+            meta = {
+                "source": r.get("source", "unknown"),
+                "chunk_index": r.get("chunk_index", -1),
+            }
+            metadata_list.append(meta)
        
-    context = "\n\n".join([r["text"] for r in results if r.get("text")])
-    prompt = build_rag_prompt(context, query)
+    context = "\n\n".join(context_chunks)
+    prompt = build_rag_prompt_advanced(
+        context=context,
+        query=query,
+        metadata=metadata_list,
+    )
     answer = await llm_client.generate(prompt)
 
     total_time = time.perf_counter() - start_time

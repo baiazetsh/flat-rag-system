@@ -34,9 +34,17 @@ def map_ollama_to_hf(model_name: str) -> str:
     if "gemma" in name:
         size = name.split(":")[-1]
         return f"google/gemma-{size}"
+    
+    if "qwen2.5" in name:        
+        size_part = name.split(":")[-1].split("-")[0]
+        return f"Qwen/qwen2.5-{size_part.upper()}"
+   
+    if "qwen2" in name:
+        size_part = name.split(":")[-1].split("-")[0]
+        return f"Qwen/Qwen2-{size_part.upper()}"
     if "qwen" in name:
-        size = name.split(":")[-1]
-        return f"Qwen/qwewn1.5-{size.upper()}"
+        size_part = name.split(":")[-1].split("-")[0]
+        return f"Qwen/Qwen-{size_part.upper()}"
     return model_name
 
 @lru_cache(maxsize=1)

@@ -43,6 +43,7 @@ if [ -n "$EMBEDDING_MODEL" ]; then
     if ! model_exists "$EMBEDDING_MODEL"; then
         echo "Pulling embedding model..."
         ollama pull "$EMBEDDING_MODEL"
+        sleep 2
     else
         echo "Embedding model already installed."
     fi
@@ -54,6 +55,7 @@ if [ -n "$LLM_MODEL" ]; then
     if ! model_exists "$LLM_MODEL"; then
         echo "Pulling LLM model..."
         ollama pull "$LLM_MODEL"
+        sleep 2
     else
         echo "LLM model already installed."
     fi

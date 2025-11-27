@@ -7,12 +7,8 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
-    TZ=UTC \
-    OMP_NUM_THREADS=4 \
-    MKL_NUM_THREADS=4 \
-    OPENBLAS_NUM_THREADS=4 \
-    NUMEXPR_NUM_THREADS=4
-
+    TZ=UTC 
+   
 # === Working directory ===
 WORKDIR /app
 
@@ -42,4 +38,5 @@ HEALTHCHECK --interval=15s --timeout=5s --retries=3 \
     CMD curl -f http://localhost:8000/api/health/ || exit 1
 
 # === Run FastAPI ===
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+

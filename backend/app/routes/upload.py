@@ -19,6 +19,7 @@ from app.dependencies.vector_client import vector_client_dependency
 from app.services.vector_services import upsert_vectors
 from app.core.config import cfg
 from app.core.logger import log
+from datetime import datetime, timezone
 
 router = APIRouter(prefix="/upload", tags=["Upload"])
 templates = Jinja2Templates(directory="app/templates")
@@ -83,11 +84,16 @@ async def upload_docs(
 
             payloads.append({
                 "id": str(uuid.uuid4()),
-                "vector": emb,                
+                #"vector": emb,                
                 "text": chunk,
                 "source":file.filename,
                 "chunk_index": idx,
-                "collection": collection,                
+                "chunk_size": len(chunk),
+                "collection": collection,
+                "uploaded_at": datetime.now(timezone.utc).isoformat(),
+                "file_size": len(content),
+                "llm_model": cfg.llm_model,
+                "embedding_model": cfg.embedding_model,
             })        
             vectors.append(emb)    
 

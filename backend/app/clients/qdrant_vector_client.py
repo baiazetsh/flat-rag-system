@@ -31,10 +31,20 @@ class QdrantVectorClient(IVectorClient):
             score_threshold=score_threshold,
         )
         #output
-        return [
-            {"text": hit.payload.get("text"), "score": hit.score}
-            for hit in results
-        ]
+        output = []
+        for hit in results:
+            payload = hit.payload or {}
+
+            output.append({            
+                "text": payload.get("text"),
+                "score": hit.score,
+                "source": payload.get("source"),
+                "chunk_index": payload.get("chunk_index"),
+                "uploaded_at": payload.get("uploaded_at"),
+                "file_size": payload.get("file_size"),
+                "chunk_size": payload.get("chunk_size"),
+            })
+        return output
 
     # === LIST COLLECTIONS ===
     async def list_collections(self):

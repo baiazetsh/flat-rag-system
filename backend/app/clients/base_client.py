@@ -5,10 +5,23 @@ Base interfaces for RAG backend components:
 - IEmbeddingClient  (returns embeddings)
 - ILLMClient        (generates text)
 - IVectorClient     (vector database operations)
+- IRerankerClient     (reranker)
 """
 
 from abc import ABC, abstractmethod
 from typing import Any
+
+# Reranking interface
+class IRerankerClient(ABC):
+    @abstractmethod
+    async def rerank(
+        self,
+        query: str,
+        docs: list[str],
+    ):
+        """Rerank"""
+        raise NotImplementedError
+
 
 # Embedding interface
 class IEmbeddingClient(ABC):

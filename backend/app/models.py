@@ -40,3 +40,4 @@ class RAGRequest(BaseModel):
     query: str
     top_k: Optional[int] = None
     collection: Optional[str] = None
+

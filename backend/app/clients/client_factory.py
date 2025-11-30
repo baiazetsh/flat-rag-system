@@ -8,9 +8,10 @@ from app.core.config import cfg
 from app.clients.embedding_client import GenericEmbeddingClient
 from app.clients.llm_client import GenericLLMClient
 from app.clients.qdrant_vector_client import QdrantVectorClient
+from app.clients.reranker_client import GenericRerankerClient
 
 
-from app.clients.base_client import IEmbeddingClient, ILLMClient, IVectorClient
+from app.clients.base_client import IEmbeddingClient, ILLMClient, IVectorClient, IRerankerClient
 
 
 class ClientFactory:
@@ -18,11 +19,22 @@ class ClientFactory:
     Builds and stores all client instances (embedding, LLM, vector DB).
     Uses configuration values from cfg.*_provider.
     """
+    @staticmethod
+    def build_reranker() -> IRerankerClient:
+        provider = cfg.reranker_provider.lower()
+        log.info(f"🔧 Initializing reranker provider: {provider}")
+
+        if provider in ("default", "generic"):
+            return GenericRerankerClient()        
+        else:
+            raise ValueError(f"Unknown Reranker provider : {provider}")
+
 
     @staticmethod
     def build_embedding() -> IEmbeddingClient:
         provider = cfg.embedding_provider.lower()
         log.info(f"🔧 Initializing embedding provider: {provider}")
+        
 
         #extendable switch
         if provider in ("default", "generic"):
@@ -74,6 +86,7 @@ class ClientFactory:
                 "embedding": <GenericEmbeddingClient>,
                 "llm": <GenericLLMClient>,
                 "vector": <QdrantVectorClient>,
+                "reranker": <GenericRerankerClient>,
             }
         """
         log.info(f" Building all client instances...")
@@ -82,6 +95,7 @@ class ClientFactory:
             "embedding": ClientFactory.build_embedding(),
             "llm": ClientFactory.build_llm(),
             "vector": ClientFactory.build_vector(),
+            "reranker": ClientFactory.build_reranker(),
         }
     
     

@@ -242,6 +242,10 @@
                 services.appendChild(createServiceCard('🤖 LLM Provider', data.llm_provider));
             }
 
+            if (data.reranker_provider) {
+                services.appendChild(createServiceCard('🤖 Reranker Provider', data.reranker_provider));
+            }
+
             lastCheck.innerHTML = `Last checked: ${new Date(data.timestamp).toLocaleString()}`;
 
         } catch (error) {
@@ -293,7 +297,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         checkHealth();
-        autoRefreshInterval = setInterval(checkHealth, 3000000);
+        autoRefreshInterval = setInterval(checkHealth, 1200000);
     });
 
     window.addEventListener('beforeunload', () => {

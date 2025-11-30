@@ -35,11 +35,12 @@ class QdrantVectorClient(IVectorClient):
         for hit in results:
             payload = hit.payload or {}
 
-            output.append({            
+            output.append({ 
+                "id": hit.id,           
                 "text": payload.get("text"),
                 "score": hit.score,
                 "source": payload.get("source"),
-                "chunk_index": payload.get("chunk_index"),
+                "chunk_index": payload.get("chunk_index", hit.id),
                 "uploaded_at": payload.get("uploaded_at"),
                 "file_size": payload.get("file_size"),
                 "chunk_size": payload.get("chunk_size"),

@@ -16,7 +16,7 @@ IMPORTANT:
 
 from app.core.config import cfg
 from app.core.logger import log
-from app.clients.base_client import IVectorClient as IVectorClient
+from app.clients.base_client import IVectorClient 
 #from app.clients.client_factory import ClientFactory
 
 

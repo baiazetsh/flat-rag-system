@@ -13,7 +13,7 @@ from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 import uuid
 from app.dependencies.splitter_factory import get_splitter
-from app.services.smart_text_splitter_service import SmartTextSplitter
+from app.splitting.splitter import SmartTextSplitter
 from app.dependencies.embedding_client import embedding_client_dependency
 from app.dependencies.vector_client import vector_client_dependency
 from app.services.vector_services import upsert_vectors

@@ -58,6 +58,8 @@ async def startup_event():
         app.state.embedding = clients["embedding"]
         app.state.llm = clients["llm"]
         app.state.vector = clients["vector"]
+        app.state.reranker = clients["reranker"]
+        
         log.info(f" All clients initializing successfully!")
 
         # Verify or create vector  collections ======

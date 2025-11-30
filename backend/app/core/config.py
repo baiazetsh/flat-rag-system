@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     vector_backend: str = "qdrant"
     qdrant_url: str = "http://qdrant:6333"   
     collection: VectorCollectionConfig =VectorCollectionConfig()
-
+    
     default_collection_name: str = "docs"
     
     #embedding
@@ -38,13 +38,27 @@ class Settings(BaseSettings):
     embedding_provider: str = "generic"
     embedding_model: str = "mxbai-embed-large"
     similarity_threshold: float = 0.75
-    show_progress_bar: bool = False
+
 
     # Cache /misc
     redis_url: str = "redis://redis:6379/0"
-    top_k: int = 5
+    top_k: int = 30
+    top_k_base: int = 30
+    top_after_rrf: int = 10
+    top_final: int = 3
 
-    ollama_num_threads: int = 4
+    top_p: float = 0.8
+    max_tokens: int = 2048
+    repeat_penalty: float = 1.2
+    seed: int = -1
+
+    # selector GPU/CPU
+    device:str = "cuda"
+    device_for_reranker: str = "cpu"
+    device_for_main_llm: str = "cuda"
+
+
+    
     ollama_base_url: str = "http://ollama:11434"
     backend_url: str = "http://localhost:8000"
 
@@ -55,7 +69,10 @@ class Settings(BaseSettings):
     min_sentence_length: int = 10
     show_progress_bar: bool = False
 
-    
+    #reranker
+    reranker_model: str = "BAAI/bge-reranker-v2-m3"
+    reranker_provider: str = "generic"
+    reranker_url:str = "http://ollama:11434/api/embeddings"
 
 
 cfg = Settings()

@@ -19,16 +19,20 @@ import datetime
 from functools import lru_cache
 import time
 
+
 router = APIRouter(prefix="/api/health", tags=["Health"])
 templates = Jinja2Templates(directory="app/templates")
 
-# === CACHE CONFIG ===
-CACHE_TTL_SECONDS = 30  # кеш на 30 секунд
 
+CACHE_TTL_SECONDS = 30
+RERANKER_TTL_SECOND = 600 
 _health_cache = {
     "timestamp": 0,
     "data": None
 }
+_last_reranker_check: float = 0.0
+_last_reranker_status: dict | None = None
+
 
 @router.get("/")
 async def health_check(
@@ -41,10 +45,57 @@ async def health_check(
     """
     Health check with 30-second cache to reduce reranker load.
     """
-    global _health_cache
-    
-    # Проверка кеша
+    global _health_cache, _last_reranker_check, _last_reranker_status    
+  
     now = time.time()
+    if _health_cache["data"] and (now - _health_cache["timestamp"]) < CACHE_TTL_SECONDS:
+        log.info("🔄 Health check: returning cached result")
+        return _health_cache["data"]
+    
+    status  ={
+        "app_name": cfg.app_name,
+        "timestamp": datetime.datetime.utcnow().isoformat(),
+    }
+    degraded = []
+
+    rerank_status = {
+        "provider": cfg.reranker_provider,
+        "status": "unknown"
+    }
+
+    if _last_reranker_status and (now - _last_reranker_check) < RERANKER_TTL_SECOND:
+        log.info("🔄 Used cached reranker status")
+        rerank_status = _last_reranker_check
+   
+    else:
+        try:
+            scores = await reranker_client.rerank(
+                query="test",
+                docs=["Hello user"],
+            )
+            if not isinstance(scores, list) or len(scores) != 1:
+                raise ValueError("Invalis score output")
+            
+            rerank_status = {
+                "provider": cfg.reranker_provider,
+                "model": cfg.reranker_model,
+                "status": "ok",
+            }
+        except Exception as e:
+            log.warning(f"⚠️ Reranker provider unavailable: {e}")
+            degraded.append("reranker")
+            rerank_status = {
+                "provider": cfg.reranker_provider,
+                "status": "error",
+                "detail": str(e),
+            }
+            degraded.append("reranker")
+
+        _last_reranker_check = now
+        _last_reranker_status = rerank_status
+    status["reranker_provider"] = rerank_status
+
+            
     if _health_cache["data"] and (now - _health_cache["timestamp"]) < CACHE_TTL_SECONDS:
         log.info("🔄 Health check: returning cached result")
         return _health_cache["data"]

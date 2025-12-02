@@ -43,14 +43,22 @@ class Settings(BaseSettings):
     # Cache /misc
     redis_url: str = "redis://redis:6379/0"
     top_k: int = 30
-    top_k_base: int = 30
-    top_after_rrf: int = 10
+    top_k_base: int = 10
+    top_after_rrf: int = 5
     top_final: int = 3
+    min_rerank_score: float = 0.005
 
     top_p: float = 0.8
     max_tokens: int = 2048
     repeat_penalty: float = 1.2
     seed: int = -1
+    top_k_base_simple: int = 10
+    top_k_base_complex: int = 20
+    top_k_simple: int = 10
+    top_after_rrf_simple: int = 5
+    top_after_rrf_complex: int = 8
+    top_final_simple: int = 3
+    top_final_complex: int = 5
 
     # selector GPU/CPU
     device:str = "cuda"

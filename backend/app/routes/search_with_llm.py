@@ -70,6 +70,26 @@ async def search_with_llm(
             for d in final_docs
         ]
 
+        # 3.1 calculate avg rerank score
+        scores = [d.get("rerank_score") for d in final_docs if "rerank_score" in d]
+        avg_rerank = sum(scores) / len(scores) if scores else None
+
+        # 3.2 determine confidence level
+        confidence = None
+        if avg_rerank is not None:
+            if avg_rerank < cfg.min_rerank_score:
+                confidence = "low"
+            elif avg_rerank < 0.3:
+                confidence = "medium"
+
+         # 3.3 build improved prompt
+        prompt = build_rag_prompt_advanced(
+            context=context,
+            query=request.query,
+            metadata=metadata,
+            confidence_level=confidence,
+        )
+
         prompt = build_rag_prompt_advanced(
             context=context,
             query=request.query,

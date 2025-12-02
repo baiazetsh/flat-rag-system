@@ -1,0 +1,173 @@
+
+
+{% extends "base.html" %}
+
+{% block title %}Upload Document - RAG Local{% endblock %}
+
+{% block content %}
+<h1>📤 Upload Document</h1>
+
+<form method="post" action="/upload/upload_docs" enctype="multipart/form-data" style="margin-top: 2rem;">
+    
+    <!-- FILE -->
+    <div style="margin-bottom: 1rem;">
+        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Choose File:</label>
+        <input 
+            type="file" 
+            name="file" 
+            required
+            style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px;"
+        >
+        <small style="color: #666; display: block; margin-top: 0.5rem;">Supported: .txt files</small>
+    </div>
+
+    <!-- COLLECTION SELECT -->
+    <div style="margin-bottom: 1rem;">
+        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Collection:</label>
+
+        <select 
+            id="collection-select" 
+            name="collection"
+            style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; margin-bottom: 0.5rem;"
+        >
+            <option value="" disabled selected>Loading...</option>
+        </select>
+
+        <button 
+            type="button"
+            id="toggle-new-collection"
+            style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: #ccc; border: none; border-radius: 5px;"
+        >
+            ➕ New
+        </button>
+
+        <input 
+            type="text"
+            id="new-collection-input"
+            placeholder="Enter new collection name"
+            style="display:none; width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; margin-top: 0.5rem;"
+        >
+    </div>
+
+    <!-- CHUNK SETTINGS -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+        <div>
+            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Chunk Size:</label>
+            <input 
+                type="number" 
+                name="chunk_size" 
+                value="1024"
+                min="100"
+                style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px;"
+            >
+        </div>
+        
+        <div>
+            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Overlap:</label>
+            <input 
+                type="number" 
+                name="overlap" 
+                value="1"
+                min="0"
+                style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px;"
+            >
+        </div>
+        
+        <div>
+            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Max Chunks:</label>
+            <input 
+                type="number" 
+                name="max_chunks" 
+                value="9999"
+                min="1"
+                style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px;"
+            >
+        </div>
+    </div>
+    
+    <button 
+        type="submit"
+        style="width: 100%; padding: 1rem; background: #667eea; color: white; border: none; border-radius: 5px; font-size: 1.1rem; font-weight: bold; cursor: pointer;"
+    >
+        🚀 Upload & Process
+    </button>
+</form>
+
+<div style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
+    <h3 style="color: #667eea;">📋 Current Settings:</h3>
+    <ul style="margin-left: 1.5rem; margin-top: 0.5rem; line-height: 1.8;">
+        <li><strong>Embedding Model:</strong> {{ embedding_model }}</li>
+        <li><strong>LLM Model:</strong> {{ llm_model }}</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let isNewCollection = false;
+
+    async function loadCollections() {
+        console.log("Loading collections...");
+
+        const select = document.getElementById("collection-select");
+
+        try {
+            const response = await fetch("/api/vector/list");
+            const data = await response.json();
+
+            select.innerHTML = ""; // clear
+
+            if (data.collections && data.collections.length > 0) {
+                data.collections.forEach(c => {
+                    const option = document.createElement("option");
+                    option.value = c;
+                    option.textContent = c;
+                    select.appendChild(option);
+                });
+            } else {
+                const option = document.createElement("option");
+                option.value = "docs";
+                option.textContent = "docs (default)";
+                select.appendChild(option);
+            }
+
+            console.log("Collections loaded.");
+        } catch (err) {
+            console.error("Failed to load collections:", err);
+            select.innerHTML = '<option value="docs">docs (fallback)</option>';
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadCollections);
+
+    // TOGGLE: Use new or existing collection
+    document.getElementById("toggle-new-collection").addEventListener("click", () => {
+        isNewCollection = !isNewCollection;
+
+        const select = document.getElementById("collection-select");
+        const input = document.getElementById("new-collection-input");
+        const button = document.getElementById("toggle-new-collection");
+
+        if (isNewCollection) {
+            select.style.display = "none";
+            select.removeAttribute("name");
+
+            input.style.display = "block";
+            input.setAttribute("name", "collection");
+            input.required = true;
+
+            button.textContent = "📋 Select";
+        } else {
+            input.style.display = "none";
+            input.removeAttribute("name");
+            input.required = false;
+
+            select.style.display = "block";
+            select.setAttribute("name", "collection");
+
+            button.textContent = "➕ New";
+        }
+    });
+
+</script>
+{% endblock %}

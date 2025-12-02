@@ -1,119 +1,188 @@
-<!-- templates/result.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>🧠 RAG Result</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 text-gray-900 font-sans min-h-screen flex flex-col">
-  
-  <header class="bg-white shadow-sm p-4 mb-6">
-    <h1 class="text-2xl font-bold text-center text-indigo-700">
-      🧠 Migration RAG Assistant - Result
-    </h1>
-    <p class="text-center text-gray-500 text-sm">
-      <a href="/" class="text-indigo-600 hover:underline">← Back to search</a>
-    </p>
-  </header>
+<!-- app/templates/result.html -->
+<!-- app/templates/result.html -->
+{% extends "base.html" %}
 
-  <main class="flex-grow flex justify-center px-4">
-    <div class="w-full max-w-3xl bg-white shadow-md rounded-xl p-6">
-      
-      <!-- Query Display -->
-      <div class="mb-4 p-3 bg-blue-50 rounded-lg">
-        <h3 class="font-semibold text-sm text-gray-600 mb-1">Your Question:</h3>
-        <p class="text-gray-800">{{ query }}</p>
-      </div>
+{% block title %}Result - RAG Assistant{% endblock %}
 
-      <!-- Answer Section -->
-      <div class="border-t pt-4 mb-4">
-        <h2 class="font-semibold text-lg mb-3 text-indigo-700">📝 Answer:</h2>
-        <div class="bg-gray-50 p-4 rounded-lg">
-          <p class="text-gray-800 whitespace-pre-wrap">{{ result.get('answer', 'No answer available.') }}</p>
-        </div>
-      </div>
+{% block extra_styles %}
+<style>
+    .answer-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin: 2rem 0;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .chunk {
+        background: #f8f9fa;
+        border-left: 4px solid #667eea;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 5px;
+    }
+    
+    .score {
+        display: inline-block;
+        background: #28a745;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    
+    .metadata {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin: 2rem 0;
+    }
+    
+    .metadata-item {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 5px;
+        text-align: center;
+    }
+    
+    .metadata-item strong {
+        display: block;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
 
-      <!-- Metadata Section -->
-      <div class="grid grid-cols-2 gap-4 mt-4 p-4 bg-gray-50 rounded-lg">
-        <div>
-          <p class="text-sm text-gray-600">🤖 <strong>LLM Model:</strong></p>
-          <p class="text-sm">{{ model }}</p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-600">🔢 <strong>Embedding Model:</strong></p>
-          <p class="text-sm">{{ vector_db }}</p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-600">📚 <strong>Collection:</strong></p>
-          <p class="text-sm">{{ collection }}</p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-600">📄 <strong>Context Chunks:</strong></p>
-          <p class="text-sm">{{ result.get('context_used', 0) }}</p>
-        </div>
-      </div>
+{% block content %}
+<h1>🧠 Migration RAG Assistant — Result</h1>
 
-      <!-- Timing Information -->
-      {% if timing %}
-      <div class="mt-4 p-4 bg-green-50 rounded-lg">
-        <h3 class="font-semibold text-base mb-2 text-green-700">⏱️ Performance:</h3>
-        <div class="grid grid-cols-2 gap-2 text-sm">
-          <div>Embedding: <span class="font-mono">{{ timing.get('embedding', 0) }} ms</span></div>
-          <div>Search: <span class="font-mono">{{ timing.get('search', 0) }} ms</span></div>
-          <div>LLM Generation: <span class="font-mono">{{ timing.get('llm', 0) }} s</span></div>
-          <div>Total: <span class="font-mono font-bold">{{ timing.get('total', 0) }} s</span></div>
-        </div>
-      </div>
-      {% endif %}
+<div style="margin: 1rem 0;">
+    <a href="/ui/" style="text-decoration: none; color: #667eea; font-weight: bold;">← Back to search</a>
+</div>
 
-      <!-- Results Section (Retrieved Documents) -->
-      {% if results %}
-      <details class="mt-4 p-4 bg-yellow-50 rounded-lg">
-        <summary class="cursor-pointer text-yellow-800 font-semibold hover:underline">
-          📄 Retrieved Documents ({{ results|length }})
-        </summary>
-        <div class="mt-3 space-y-3">
-          {% for item in results %}
-          <div class="p-3 bg-white border border-yellow-200 rounded">
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-sm font-semibold text-gray-700">Rank #{{ item.rank }}</span>
-              <span class="text-sm bg-yellow-100 px-2 py-1 rounded">
-                Score: {{ item.score }}
-              </span>
-            </div>
-            <p class="text-xs text-gray-600 mb-1">Source: {{ item.source }}</p>
-            <p class="text-sm text-gray-700">{{ item.text_preview[:200] }}...</p>
-          </div>
-          {% endfor %}
-        </div>
-      </details>
-      {% endif %}
+<div style="background: #e7f3ff; padding: 1rem; border-radius: 5px; margin: 1rem 0;">
+    <strong>💬 Your Question:</strong><br>
+    {{ query }}
+</div>
 
-      <!-- Debug Info -->
-      <details class="mt-4">
-        <summary class="cursor-pointer text-gray-600 text-sm hover:underline">
-          🔧 Debug: Raw JSON Response
-        </summary>
-        <pre class="mt-2 bg-gray-100 p-3 text-xs rounded-lg whitespace-pre-wrap overflow-x-auto">{{ raw_data }}</pre>
-      </details>
-
-      <!-- Action Buttons -->
-      <div class="mt-6 flex gap-3 justify-center">
-        <a href="/" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg shadow transition">
-          🔍 New Search
-        </a>
-        <a href="/plot" target="_blank" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-6 rounded-lg shadow transition">
-          📊 View Vectors
-        </a>
-      </div>
-
+<div class="answer-box">
+    <h2 style="margin: 0 0 1rem 0;">📝 Answer:</h2>
+    <div style="font-size: 1.1rem; line-height: 1.6;">
+        {{ result.answer or "No answer available." }}
     </div>
-  </main>
+</div>
 
-  <footer class="text-center text-gray-500 text-xs py-4 mt-6">
-    © 2025 RAG Assistant | Powered by FastAPI + Qdrant + Ollama
-  </footer>
+<div class="metadata">
+    <div class="metadata-item">
+        <strong>🤖 LLM Model:</strong>
+        {{ model }}
+    </div>
+    <div class="metadata-item">
+        <strong>🔢 Embedding Model:</strong>
+        {{ vector_db }}
+    </div>
+    <div class="metadata-item">
+        <strong>📚 Collection:</strong>
+        {{ collection }}
+    </div>
+    <div class="metadata-item">
+        <strong>📄 Retrieved Docs:</strong>
+        {{ result.context_used or results|length }}
+    </div>
+</div>
 
-</body>
-</html>
+
+{% if results %}
+<h2 style="margin-top: 2rem;">📄 Retrieved Chunks ({{ results|length }})</h2>
+
+{% for chunk in results %}
+<div class="chunk">
+
+    <!-- HEADER -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+        <strong>#{{ loop.index }}</strong>
+        <span class="score">Score: {{ "%.3f"|format(chunk.score) }}</span>
+    </div>
+
+    <!-- METADATA COLLAPSIBLE -->
+    <details style="
+        background:#eef2ff;
+        padding:0.75rem 1rem;
+        border-radius:6px;
+        border-left:4px solid #667eea;
+        margin-bottom:0.75rem;
+        ">
+        <summary style="cursor:pointer; font-weight:600; color:#4b4ded;">
+            📂 Metadata
+        </summary>
+
+        <div style="margin-top:0.75rem;">
+            <div><strong>📄 Source:</strong> {{ chunk.source or "unknown" }}</div>
+            <div><strong>🔢 Chunk Index:</strong> {{ chunk.chunk_index }}</div>
+            {% if chunk.uploaded_at %}
+            <div><strong>⏱ Uploaded:</strong> {{ chunk.uploaded_at }}</div>
+            {% endif %}
+            {% if chunk.file_size %}
+            <div><strong>📦 File Size:</strong> {{ chunk.file_size }} bytes</div>
+            {% endif %}
+            {% if chunk.chunk_size %}
+            <div><strong>✂️ Chunk Size:</strong> {{ chunk.chunk_size }} chars</div>
+            {% endif %}
+        </div>
+    </details>
+
+    <!-- TEXT + COPY -->
+    <div style="position:relative;">
+        <button onclick="copyChunk('{{ loop.index }}')"
+            style="
+                position:absolute;
+                right:10px;
+                top:10px;
+                padding:4px 10px;
+                border:none;
+                border-radius:4px;
+                background:#667eea;
+                color:white;
+                cursor:pointer;
+                font-size:0.75rem;
+            ">
+            Copy
+        </button>
+
+        <pre id="chunk_{{ loop.index }}" 
+             style="white-space:pre-wrap; background:white; padding:1rem; border-radius:5px; margin:0;">
+{{ chunk.text }}</pre>
+    </div>
+
+</div>
+{% endfor %}
+{% endif %}
+
+<details style="margin-top: 2rem;">
+    <summary style="cursor: pointer; font-weight: bold; color: #667eea;">🔧 Debug: Raw JSON Response</summary>
+    <pre style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin-top: 1rem; overflow-x: auto;">{{ raw_data }}</pre>
+</details>
+
+<div style="text-align: center; margin-top: 2rem;">
+    <a href="/ui/" style="display: inline-block; padding: 1rem 2rem; background: #667eea; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+        🔍 New Search
+    </a>
+    <a href="/api/plot/?collection={{ collection }}&limit=100" style="display: inline-block; padding: 1rem 2rem; background: #28a745; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin-left: 1rem;">
+        📊 View Vectors
+    </a>
+</div>
+
+<script>
+function copyChunk(idx) {
+    const el = document.getElementById("chunk_" + idx);
+    if (!el) return;
+
+    navigator.clipboard.writeText(el.innerText).then(() => {
+        alert("✔ Chunk copied");
+    });
+}
+</script>
+
+{% endblock %}

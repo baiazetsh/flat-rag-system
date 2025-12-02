@@ -1,0 +1,366 @@
+{% extends "base.html" %}
+
+{% block title %}Vector Collections - RAG Local{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .dashboard-header h1 {
+        color: white;
+        border: none;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .panel {
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 1.5rem;
+    }
+    
+    .panel h2 {
+        color: #667eea;
+        margin: 0 0 1.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.5rem;
+    }
+    
+    .collection-list {
+        list-style: none;
+    }
+    
+    .collection-item {
+        background: #f8f9fa;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s;
+    }
+    
+    .collection-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .collection-name {
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .collection-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn-small {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 5px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .btn-danger:hover {
+        background: #c82333;
+        transform: scale(1.05);
+    }
+    
+    .btn-warning {
+        background: #ffc107;
+        color: #333;
+    }
+    
+    .btn-warning:hover {
+        background: #e0a800;
+        transform: scale(1.05);
+    }
+    
+    .btn-info {
+        background: #17a2b8;
+        color: white;
+    }
+    
+    .btn-info:hover {
+        background: #138496;
+        transform: scale(1.05);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border: 2px dashed #dee2e6;
+    }
+    
+    .empty-state .icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e9ecef;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-group small {
+        display: block;
+        color: #6c757d;
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .btn-create {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+    
+    .info-banner {
+        background: #e7f3ff;
+        border-left: 4px solid #667eea;
+        padding: 1.5rem;
+        border-radius: 5px;
+        margin: 2rem 0;
+    }
+    
+    .info-banner h3 {
+        color: #667eea;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .info-banner ul {
+        margin: 0.5rem 0 0 1.5rem;
+        line-height: 1.8;
+    }
+    
+    .stats-mini {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #e9ecef;
+    }
+    
+    .stat-mini {
+        text-align: center;
+    }
+    
+    .stat-mini .value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .stat-mini .label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>🗄️ Vector Collections Manager</h1>
+    <p>Manage your vector databases and collections</p>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Existing Collections Panel -->
+    <div class="panel">
+        <h2>📚 Existing Collections</h2>
+        
+        {% if collections %}
+        <ul class="collection-list">
+            {% for coll in collections %}
+            <li class="collection-item">
+                <div class="collection-name">
+                    <span>🗃️</span>
+                    <span>{{ coll }}</span>
+                </div>
+                <div class="collection-actions">
+                    <a href="/api/plot/?collection={{ coll }}&limit=100" class="btn-small btn-info" title="Visualize">
+                        📊
+                    </a>
+                    <form method="post" action="/ui/vector/recreate" style="display: inline;">
+                        <input type="hidden" name="name" value="{{ coll }}">
+                        <input type="hidden" name="vector_size" value="1024">
+                        <input type="hidden" name="distance" value="cosine">
+                        <button type="submit" class="btn-small btn-warning" title="Recreate" onclick="return confirm('Recreate collection {{ coll }}? This will delete all vectors!')">
+                            ♻️
+                        </button>
+                    </form>
+                    <form method="post" action="/ui/vector/delete" style="display: inline;">
+                        <input type="hidden" name="name" value="{{ coll }}">
+                        <button type="submit" class="btn-small btn-danger" title="Delete" onclick="return confirm('Delete collection {{ coll }}? This cannot be undone!')">
+                            🗑️
+                        </button>
+                    </form>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        
+        <div class="stats-mini">
+            <div class="stat-mini">
+                <div class="value">{{ collections|length }}</div>
+                <div class="label">Collections</div>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="icon">📪</div>
+            <h3>No Collections Yet</h3>
+            <p>Create your first collection to get started</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Create New Collection Panel -->
+    <div class="panel">
+        <h2>➕ Create New Collection</h2>
+        
+        <form method="post" action="/ui/vector/create">
+            <div class="form-group">
+                <label for="name">Collection Name *</label>
+                <input 
+                    type="text" 
+                    id="name"
+                    name="name" 
+                    required
+                    placeholder="my_collection"
+                    pattern="[a-zA-Z0-9_-]+"
+                >
+                <small>Use only letters, numbers, underscores, and hyphens</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="vector_size">Vector Dimension *</label>
+                <select id="vector_size" name="vector_size">
+                    <option value="384">384 (all-MiniLM-L6-v2)</option>
+                    <option value="768">768 (nomic-embed-text)</option>
+                    <option value="1024" selected>1024 (mxbai-embed-large)</option>
+                    <option value="1536">1536 (OpenAI ada-002)</option>
+                    <option value="3072">3072 (OpenAI text-embedding-3-large)</option>
+                </select>
+                <small>Must match your embedding model's output dimension</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="distance">Distance Metric *</label>
+                <select id="distance" name="distance">
+                    <option value="cosine" selected>Cosine (recommended)</option>
+                    <option value="dot">Dot Product</option>
+                    <option value="euclid">Euclidean</option>
+                </select>
+                <small>Cosine similarity works best for most use cases</small>
+            </div>
+            
+            <button type="submit" class="btn-create">
+                ✨ Create Collection
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="info-banner">
+    <h3>💡 About Vector Collections</h3>
+    <ul>
+        <li><strong>Collections</strong> are isolated vector databases for organizing documents by topic or project</li>
+        <li><strong>Vector Dimension</strong> must match your embedding model (mxbai-embed-large = 1024)</li>
+        <li><strong>Distance Metric</strong> determines how similarity is calculated (cosine is most common)</li>
+        <li><strong>Recreate</strong> will delete all vectors and create a fresh empty collection</li>
+        <li><strong>Delete</strong> permanently removes the collection and all its vectors</li>
+    </ul>
+</div>
+
+<div class="info-banner" style="background: #fff3cd; border-left-color: #ffc107;">
+    <h3>⚙️ Common Use Cases</h3>
+    <ul>
+        <li><strong>Separate by Topic:</strong> Create different collections for documentation, support tickets, research papers</li>
+        <li><strong>Multi-tenant:</strong> One collection per customer or organization</li>
+        <li><strong>Versioning:</strong> Keep different versions of documents in separate collections</li>
+        <li><strong>Testing:</strong> Use a test collection before adding to production</li>
+    </ul>
+</div>
+{% endblock %}

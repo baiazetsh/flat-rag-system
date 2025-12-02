@@ -29,6 +29,8 @@ Thumbs.db
 
 # Project specific
 analyze_project.py
+analyze_project_v3
+analyze_project_enhanced
 logs/
 *.log
 

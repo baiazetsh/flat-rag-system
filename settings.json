@@ -1,0 +1,6 @@
+{
+    "python.languageServer": "Jedi",
+    "python.analysis.autoImportCompletions": false,
+    "python.analysis.typeCheckingMode": "off",
+    "python.defaultInterpreterPath": "/home/baiazet/Projects/pet_projects/rag_local/venv/bin/python"
+}
